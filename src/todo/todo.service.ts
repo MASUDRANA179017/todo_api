@@ -15,7 +15,6 @@ export class TodoService {
     ) { }
 
     async createTodo(crateTodoDto: CreateTodoDto, userId: number): Promise<Todo> {
-        const todoData = crateTodoDto;
 
         const user = await this.UserRepository.findOne({ where: { id: userId } });
         if (!user) {
@@ -23,7 +22,8 @@ export class TodoService {
         }
 
         const todo = this.TodoRepository.create({
-            ...CreateTodoDto,
+            title: crateTodoDto.title,
+            description: String(crateTodoDto.description),
             owner: user,
             createdAt: new Date(),
         });
@@ -31,24 +31,46 @@ export class TodoService {
         return this.TodoRepository.save(todo);
     }
 
-    async getAllTodo(): Promise <Todo[]>{
-        return this.TodoRepository.find({ relations:["owner"] })
+    async getAllTodo(): Promise<Todo[]> {
+        return this.TodoRepository.find({ relations: ["owner"] })
     }
 
 
-    async getTodoById(id: string): Promise<Todo>{
-        const todo = await this.TodoRepository.findOne({where: {id: Number(id)}});
+    async getTodoById(id: string): Promise<Todo> {
+        const todo = await this.TodoRepository.findOne({ where: { id: Number(id) } });
         if (!todo) {
-            throw new Error (`Todo with ${id} not found`)
+            throw new Error(`Todo with ${id} not found`)
         }
 
         return todo;
     }
 
 
-    async deleteTodo (id: string): Promise<void>{
-        const todo = await this.TodoRepository.findOne({where: {id: Number(id)}});
-        if(!todo){
+    async updateTodoById(id: string, createTodoDto: CreateTodoDto, userId: number): Promise<Todo | undefined> {
+        const { ...updateData } = createTodoDto;
+
+        const user = await this.UserRepository.findOne({ where: { id: userId } })
+        if (!user) {
+            throw new Error(`User not found`)
+        }
+        const todo = await this.TodoRepository.findOne({ where: { id: Number(id) } });
+        if (!todo) {
+            throw new Error(`Todo with ${id} not found`);
+        }
+
+
+        Object.assign(todo, updateData);
+        return this.TodoRepository.save(todo);
+
+
+    }
+
+
+
+
+    async deleteTodo(id: string): Promise<void> {
+        const todo = await this.TodoRepository.findOne({ where: { id: Number(id) } });
+        if (!todo) {
             throw new Error(`Todo with ID ${id} not found`)
         }
 

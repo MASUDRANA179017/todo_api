@@ -7,7 +7,7 @@ export class Todo {
     id: number;
 
     @Column({ unique: true })
-    tittle: string;
+    title: string;
 
     @Column()
     description: string

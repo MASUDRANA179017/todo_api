@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { JwtAuthGuard } from 'src/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -15,6 +15,10 @@ export class TodoController {
     @ApiResponse({
         status: 200,
         description: "Todo Create successfully"
+    })
+    @ApiResponse({
+        status: 500,
+        description: "this is custom error "
     })
     async createTodo(@Body() createTodoDto: CreateTodoDto, @Request() req: any) {
         return this.todoService.createTodo(createTodoDto, req.user.id)
@@ -54,6 +58,28 @@ export class TodoController {
     async getTodoById(@Param("id") id: string) {
         return this.todoService.getTodoById(id);
     }
+
+
+
+    @Put("updateById/:id")
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: "update Todo by ID" })
+    @ApiResponse({
+        status: 200,
+        description: "Todo Update successful"
+    })
+    @ApiResponse({
+        status: 400,
+        description: "Internal server error"
+    })
+
+    async updateTodoById(@Param("id") id: string, @Body() createTodoDto: CreateTodoDto, @Request() req: any) {
+        return this.todoService.updateTodoById(id, createTodoDto, req.user.id);
+    }
+
+
+
 
     @Delete("delete/:id")
     @UseGuards(JwtAuthGuard)
